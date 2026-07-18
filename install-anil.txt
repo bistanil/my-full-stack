@@ -1,0 +1,10 @@
+install brew
+install docker
+configure docker - in project
+
+install UV
+
+install postgrace@15   
+
+
+install
