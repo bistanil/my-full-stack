@@ -85,7 +85,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
         <Pencil className="mr-2 h-4 w-4" />
         Edit Item
       </DropdownMenuItem>
-      <DialogContent className="sm:max-w-lg"> {/* Expanded width slightly to give the editor room */}
+      <DialogContent className="sm:max-w-3xl"> {/* Expanded width slightly to give the editor room */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
