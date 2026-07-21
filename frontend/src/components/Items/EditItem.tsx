@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Pencil } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import Editor from "react-simple-wysiwyg" // 1. Import the rich text editor
 import { z } from "zod"
 
 import { type ItemPublic, ItemsService } from "@/client"
@@ -53,7 +54,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
     criteriaMode: "all",
     defaultValues: {
       title: item.title,
-      description: item.description ?? undefined,
+      description: item.description ?? "", // Fallback to an empty string for the editor area
     },
   })
 
@@ -81,10 +82,10 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
         onSelect={(e) => e.preventDefault()}
         onClick={() => setIsOpen(true)}
       >
-        <Pencil />
+        <Pencil className="mr-2 h-4 w-4" />
         Edit Item
       </DropdownMenuItem>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg"> {/* Expanded width slightly to give the editor room */}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
@@ -110,6 +111,7 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                 )}
               />
 
+              {/* 2. Updated Description Field with Rich Text Support */}
               <FormField
                 control={form.control}
                 name="description"
@@ -117,7 +119,20 @@ const EditItem = ({ item, onSuccess }: EditItemProps) => {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Input placeholder="Description" type="text" {...field} />
+                      <div className="min-h-[200px] rounded-md border border-input overflow-hidden bg-background focus-within:ring-2 focus-within:ring-ring">
+                        <Editor
+                          value={field.value || ""}
+                          onChange={(e) => field.onChange(e.target.value)}
+                          containerProps={{
+                            style: {
+                              border: 0,
+                              minHeight: "200px",
+                              background: "transparent",
+                              color: "inherit"
+                            }
+                          }}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

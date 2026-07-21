@@ -2,9 +2,8 @@ import uuid
 from datetime import UTC, datetime
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime , Column, Text  # Added Column and Text here
 from sqlmodel import Field, Relationship, SQLModel
-
 
 def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
@@ -73,8 +72,12 @@ class UsersPublic(SQLModel):
 # Shared properties
 class ItemBase(SQLModel):
     title: str = Field(min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
-
+    #description: str | None = Field(default=None, max_length=255)
+# CHANGED: Added sa_column to override database layout, and removed max_length
+    description: str | None = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True)
+    )
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
@@ -84,7 +87,8 @@ class ItemCreate(ItemBase):
 # Properties to receive on item update
 class ItemUpdate(SQLModel):
     title: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = Field(default=None, max_length=255)
+    # CHANGED: Removed max_length so the Pydantic API layer accepts long text strings
+    description: str | None = Field(default=None)
 
 
 # Database model, database table inferred from class name

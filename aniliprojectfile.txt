@@ -1,0 +1,29 @@
+Bash
+git add .
+git commit -m "Your commit message"
+git push origin main
+--------------------------------------
+1st time 20 july 2026
+docker compose up --build
+sudo systemctl stop apache2
+sudo systemctl stop postgresql
+------------------------------------------
+1st change DB issue
+# Postgres
+#POSTGRES_SERVER=localhost     / # added
+----------------------------------------------------
+docker compose stop frontend
+docker compose build frontend
+docker compose up frontend -d
+-------------------------------------------------------------
+docker compose down -v
+docker compose up -d
+
+docker compose exec backend alembic upgrade head
+docker compose exec backend python app/initial_data.py
+docker compose exec db psql -U postgres -d app -c "\d item"
+
+docker compose exec db psql -U postgres -d app -c "ALTER TABLE item ALTER COLUMN description TYPE TEXT;"
+docker compose exec db psql -U postgres -d app -c "\d item"
+-------------------------------------------------------------------
+

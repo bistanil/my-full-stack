@@ -5,6 +5,10 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
+// Highlight-start: Import the template-compatible Editor block
+import Editor from "react-simple-wysiwyg"
+// Highlight-end
+
 import { type ItemCreate, ItemsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
@@ -70,6 +74,7 @@ const AddItem = () => {
     mutation.mutate(data)
   }
 
+  // @ts-ignore
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -78,7 +83,7 @@ const AddItem = () => {
           Add Item
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Add Item</DialogTitle>
           <DialogDescription>
@@ -109,22 +114,37 @@ const AddItem = () => {
                 )}
               />
 
+              {/* Highlight-start: The integrated rich text area structure */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Description (Rich Text)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Description" type="text" {...field} />
+                      <div className="rounded-md border border-input bg-background text-foreground custom-editor-wrapper">
+                        <Editor
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          containerProps={{
+                            style: {
+                              minHeight: "180px",
+                              resize: "vertical",
+                              backgroundColor: "transparent",
+                              color: "inherit"
+                            }
+                          }}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {/* Highlight-end */}
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="mt-4">
               <DialogClose asChild>
                 <Button variant="outline" disabled={mutation.isPending}>
                   Cancel

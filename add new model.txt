@@ -1,0 +1,167 @@
+---------------------------add new model----------------------------------------
+
+🏗️ Layer 1: The Backend Model & Schema
+🧬 Layer 2: Database Table Creation (Migrations)
+🔌 Layer 3: API Route Infrastructure
+    1. Create the routes file
+    2. Register with Main Router:
+ 🔄 Layer 4: Client SDK Auto-Generation - frontend need to run first
+ 🎨 Layer 5: Frontend Interface Wiring
+    1. Route Component Setup
+    2. Append Link to Sidebar Component
+-------------------------------------------------------------------------------
+🏗️ Layer 1: The Backend Model & Schema (backend/app/models.py)The template handles database rows and API communication schemas in a single file using SQLModel. Open backend/app/models.py and append your new domain structures at the bottom:Pythonfrom typing import Optional
+from sqlmodel import Field, SQLModel
+
+# 1. Database Table representation
+class Stock(SQLModel, table=True):
+    __tablename__: str = "stocks"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    symbol: str = Field(index=True, unique=True, nullable=False)
+    name: str = Field(nullable=False)
+    price: float = Field(default=0.0)
+    market_cap: Optional[float] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+
+# 2. Schema used for creating data via API POST requests
+class StockCreate(SQLModel):
+    symbol: str
+    name: str
+    price: float = 0.0
+    market_cap: Optional[float] = None
+    description: Optional[str] = None
+
+# 3. Schema used for updates via API PUT requests
+class StockUpdate(SQLModel):
+    symbol: Optional[str] = None
+    name: Optional[str] = None
+    price: Optional[float] = None
+    market_cap: Optional[float] = None
+    description: Optional[str] = None
+
+# 4. Schema used for safe outbound API responses (Public Data)
+class StockPublic(SQLModel):
+    id: int
+    symbol: str
+    name: str
+    price: float
+    market_cap: Optional[float]
+    description: Optional[str]
+
+# 5. Paginated wrapper schema for multiple items
+class StocksPublic(SQLModel):
+    data: list[StockPublic]
+    count: int
+🧬 Layer 2: Database Table Creation (Migrations)Because you added a physical database table (table=True), you must generate an evolutionary version file via Alembic so your underlying database builds the table columns:Bash# 1. Spin up background services if stopped
+docker compose up -d
+
+# 2. Automatically generate the structure modification blueprint
+docker compose exec backend alembic revision --autogenerate -m "Add stocks table"
+
+# 3. Apply the schema change directly onto the running database instance
+docker compose exec backend alembic upgrade head
+
+🔌 Layer 3: API Route InfrastructureCreate a new file containing your structural CRUD operations and register it with your master api router matrix.1. Create the routes file: backend/app/api/routes/stocks.pyPythonfrom typing import Any
+from fastapi import APIRouter, Depends, HTTPException
+from sqlmodel import Session, func, select
+from app.api.deps import get_db, get_current_active_superuser
+from app.models import Stock, StockCreate, StockUpdate, StockPublic, StocksPublic, Message
+
+router = APIRouter()
+
+@router.get("/", response_model=StocksPublic)
+def read_stocks(session: Session = Depends(get_db), skip: int = 0, limit: int = 100) -> Any:
+    """Fetch multiple stock entries with pagination."""
+    count_statement = select(func.count()).select_from(Stock)
+    count = session.exec(count_statement).one()
+
+    statement = select(Stock).offset(skip).limit(limit)
+    stocks = session.exec(statement).all()
+
+    return StocksPublic(data=stocks, count=count)
+
+@router.post("/", response_model=StockPublic)
+def create_stock(*, session: Session = Depends(get_db), stock_in: StockCreate, current_user: Any = Depends(get_current_active_superuser)) -> Any:
+    """Create a new stock record (Admin restricted)."""
+    existing = session.exec(select(Stock).where(Stock.symbol == stock_in.symbol.upper())).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Stock ticker symbol already exists.")
+
+    db_stock = Stock.model_validate(stock_in)
+    db_stock.symbol = db_stock.symbol.upper()
+    session.add(db_stock)
+    session.commit()
+    session.refresh(db_stock)
+    return db_stock
+2. Register with Main Router: backend/app/api/main.pyOpen backend/app/api/main.py and plug your newly created module endpoints into the primary global pipeline tree:Pythonfrom fastapi import APIRouter
+from app.api.routes import login, users, items, stocks # 1. Import your stocks router module
+
+api_router = APIRouter()
+api_router.include_router(login.router, tags=["login"])
+api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(items.router, prefix="/items", tags=["items"])
+
+# 2. Append the route path mapping securely here
+api_router.include_router(stocks.router, prefix="/stocks", tags=["stocks"])
+
+
+🔄 Layer 4: Client SDK Auto-GenerationThe template features a built-in OpenAPI schema reader script that completely auto-generates your TypeScript fetching hooks and interfaces so you never manually type fetch or axios calls on the client side.Run this script from your project root to auto-generate the frontend SDK types:Bash# This scans your FastAPI routes and creates new SDK modules inside frontend/src/client/
+docker compose exec frontend npm run generate-client
+Now, StocksService and types like StockPublic are instantly available inside your frontend code!🎨 Layer 5: Frontend Interface Wiring1. Route Component Setup (frontend/src/routes/_layout/admin/stocks.tsx)Create the view panel path. We use @tanstack/react-query to pull remote cache nodes cleanly:TypeScriptimport { createFileRoute } from "@tanstack/react-router"
+import { useQuery } from "@tanstack/react-query"
+import { StocksService } from "@/client"
+import UploadStocksModal from "@/components/Stocks/UploadStocksModal"
+
+export const Route = createFileRoute("/_layout/admin/stocks")({
+  component: StocksDashboard,
+})
+
+function StocksDashboard() {
+  const { data: stocksData, isLoading } = useQuery({
+    queryKey: ["stocks"],
+    queryFn: () => StocksService.readStocks({ limit: 100 }),
+  })
+
+  if (isLoading) return <div className="p-8 text-center text-muted-foreground">Loading inventory...</div>
+
+  return (
+    <div className="p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Stocks System Data Matrix</h1>
+        <UploadStocksModal />
+      </div>
+
+      <div className="border rounded-xl overflow-hidden bg-background">
+        <table className="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr className="border-b bg-muted/40 font-medium">
+              <th className="p-4">Ticker</th>
+              <th className="p-4">Company Name</th>
+              <th className="p-4">Price (INR)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stocksData?.data.map((stock) => (
+              <tr key={stock.id} className="border-b hover:bg-muted/20">
+                <td className="p-4 font-mono font-bold text-primary">{stock.symbol}</td>
+                <td className="p-4">{stock.name}</td>
+                <td className="p-4">₹{stock.price.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+2. Append Link to Sidebar Component (frontend/src/components/Common/AppSidebar.tsx)Import an icon from lucide-react and mount the path object into the dynamic items configuration mapper array:TypeScript// Inside AppSidebar.tsx items list:
+const items = currentUser?.is_superuser
+  ? [
+      ...baseItems,
+      { icon: TrendingUp, title: "Stocks", path: "/admin/stocks" },
+      { icon: Users, title: "Admin", path: "/admin" }
+    ]
+  : baseItems
+
+

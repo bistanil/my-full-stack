@@ -1,0 +1,42 @@
+chnage description varchar 255 to long text in DB and
+
+in model
+ class ItemBase(SQLModel):
+    title: str = Field(min_length=1, max_length=255)
+    #description: str | None = Field(default=None, max_length=255)
+# CHANGED: Added sa_column to override database layout, and removed max_length
+    description: str | None = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True)
+    )
+---------------------------------------------------------
+
+# Properties to receive on item update
+class ItemUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=255)
+    # CHANGED: Removed max_length so the Pydantic API layer accepts long text strings
+    description: str | None = Field(default=None)
+----------------------------------------------------------------------------------------
+alembic update
+
+# 1. Start your containers in detached mode
+docker compose up -d
+
+# 2. Run your migration now that the backend service is alive
+docker compose exec backend alembic revision --autogenerate -m "change_item_description_to_text"
+
+# 3. Apply the migration changes live to the database
+docker compose exec backend alembic upgrade head
+--------------------------------------------------------------------------------
+********* when i remove DB and start from scratch ***********
+
+docker compose down -v
+docker compose up -d
+
+docker compose exec backend alembic upgrade head
+docker compose exec backend python app/initial_data.py
+docker compose exec db psql -U postgres -d app -c "\d item"
+
+docker compose exec db psql -U postgres -d app -c "ALTER TABLE item ALTER COLUMN description TYPE TEXT;"
+docker compose exec db psql -U postgres -d app -c "\d item"
+------------------------------------------------------------------------
