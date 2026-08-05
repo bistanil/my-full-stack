@@ -382,7 +382,6 @@ def get_stock_patterns(
     # Step 2: Fallback — Auto-detect patterns if database table is empty for this stock
     if not patterns:
         patterns = detect_and_save_patterns(session=session, stock=stock)
-        print("2222222222222222222222222222222222222222222222")
         # Apply optional filters if requested
         if pattern_category:
             patterns = [p for p in patterns if p.pattern_category == pattern_category]
