@@ -1,4 +1,10 @@
 token- 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
+
+open api
+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
+
+server   Documentation at http://0.0.0.0:8000/docs
+
 Bash
 git add .
 git commit -m "Your commit message"
@@ -42,3 +48,79 @@ docker compose down
 docker compose up
 -------------------------------------------------
 
+http://172.19.0.4:8080/
+http://172.19.0.4:8080/
+
+http://localhost:8000/docs
+
+----------------------------------------------------------------------
+
+Step A: Generate the Migration File
+
+docker compose exec backend alembic revision --autogenerate -m "Add StockNews table"
+
+docker compose exec backend alembic upgrade head
+
+docker compose exec db psql -U postgres -d app -c "\dt"
+
+-------------------------------------------------------------------
+only db running
+docker compose up -d db
+
+then
+docker compose run --rm backend alembic revision --autogenerate -m "Add StockNews table"
+
+
+--------worked to add new table --------------
+docker compose run --no-deps --rm backend cat app/models.py
+docker compose build backend
+docker compose run --no-deps --rm backend alembic revision --autogenerate -m "Add StockNews table"
+
+----------------------------------------------
+--------after adding new table getting prestart error for alembic------------
+
+docker compose exec db psql -U postgres -d app -c "DELETE FROM alembic_version;"
+
+--------after all removed from table then run below
+
+docker compose run --rm --no-deps backend alembic stamp head
+------
+Step 2: Generate the migration for your new model (if not created yet)
+If you haven't generated the migration file for StockPrice yet:
+----------------------------------------------------------
+docker compose run --rm --no-deps backend alembic revision --autogenerate -m "Add stock_price table"
+
+docker compose run --rm --no-deps backend alembic upgrade head
+
+
+
+
+
+npx tsr generate
+
+new file path generater
+
+
+curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent" \
+  -H 'Content-Type: application/json' \
+  -H 'X-goog-api-key: AQ.Ab8RN6IIm2x-j1K70m0UAG6pKdrHbc4STqPlPsux173dPavuAw' \
+  -X POST \
+  -d '{
+    "contents": [
+      {
+        "parts": [
+          {
+            "text": "Explain how AI works in a few words"
+          }
+        ]
+      }
+    ]
+  }'
+  -------------------------------------------------
+
+  # Restart systemd-resolved (Linux)
+sudo systemctl restart systemd-resolved
+
+# Restart the Docker daemon
+sudo systemctl restart docker
+----------------------------------------------

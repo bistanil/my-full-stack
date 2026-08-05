@@ -2,6 +2,7 @@ import {
   type ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table"
@@ -10,9 +11,12 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Search,
 } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -32,66 +36,96 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  enableSearch?: boolean         // Optional search feature
+  searchPlaceholder?: string   // Custom placeholder text
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  enableSearch = false, // Defaults to FALSE so other pages are untouched
+  searchPlaceholder = "Search...",
 }: DataTableProps<TData, TValue>) {
+  const [globalFilter, setGlobalFilter] = useState("")
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   })
 
+  const filteredRowsCount = table.getFilteredRowModel().rows.length
+
   return (
     <div className="flex flex-col gap-4">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                colSpan={columns.length}
-                className="h-32 text-center text-muted-foreground"
-              >
-                No results found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      {/* 🔍 Renders search bar ONLY if enableSearch is true */}
+      {enableSearch && (
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={searchPlaceholder}
+            value={globalFilter ?? ""}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className="pl-9 bg-background"
+          />
+        </div>
+      )}
 
+      {/* Main Table */}
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow className="hover:bg-transparent">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-32 text-center text-muted-foreground"
+                >
+                  No results found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination Footer */}
       {table.getPageCount() > 1 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-t bg-muted/20">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border-t bg-muted/20 rounded-b-md">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="text-sm text-muted-foreground">
               Showing{" "}
@@ -102,10 +136,12 @@ export function DataTable<TData, TValue>({
               {Math.min(
                 (table.getState().pagination.pageIndex + 1) *
                   table.getState().pagination.pageSize,
-                data.length,
+                filteredRowsCount,
               )}{" "}
               of{" "}
-              <span className="font-medium text-foreground">{data.length}</span>{" "}
+              <span className="font-medium text-foreground">
+                {filteredRowsCount}
+              </span>{" "}
               entries
             </div>
             <div className="flex items-center gap-x-2">

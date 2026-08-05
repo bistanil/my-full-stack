@@ -19,6 +19,14 @@ dependencies = [
     "sentry-sdk[fastapi]>=2.63.0,<3.0.0",
     "pyjwt<3.0.0,>=2.13.0",
     "pwdlib[argon2,bcrypt]>=0.3.0",
+    "pandas>=2.2.0",
+    "openpyxl>=3.1.0", # Added for Excel file support (.xlsx)
+    "feedparser >=6.0.11",
+    "openai>=2.48.0",
+    "google-genai>=0.1.0",
+    "tenacity>=8.2.0",
+    "yfinance==0.2.65",
+    "TA-Lib>=0.4.28",
 ]
 
 [dependency-groups]

@@ -57,6 +57,51 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const Body_stocks_analyze_stock_excelSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            contentMediaType: 'application/octet-stream',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_stocks-analyze_stock_excel'
+} as const;
+
+export const Body_stocks_upload_stock_excelSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            contentMediaType: 'application/octet-stream',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_stocks-upload_stock_excel'
+} as const;
+
+export const Body_stocks_upload_stock_historySchema = {
+    properties: {
+        file: {
+            type: 'string',
+            contentMediaType: 'application/octet-stream',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_stocks-upload_stock_history'
+} as const;
+
+export const DetectedBySchema = {
+    type: 'string',
+    enum: ['TA-Lib', 'Custom', 'AI', 'User'],
+    title: 'DetectedBy'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -82,8 +127,7 @@ export const ItemCreateSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string',
-                    maxLength: 255
+                    type: 'string'
                 },
                 {
                     type: 'null'
@@ -108,8 +152,7 @@ export const ItemPublicSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string',
-                    maxLength: 255
+                    type: 'string'
                 },
                 {
                     type: 'null'
@@ -163,8 +206,7 @@ export const ItemUpdateSchema = {
         description: {
             anyOf: [
                 {
-                    type: 'string',
-                    maxLength: 255
+                    type: 'string'
                 },
                 {
                     type: 'null'
@@ -249,6 +291,416 @@ export const PrivateUserCreateSchema = {
     type: 'object',
     required: ['email', 'password', 'full_name'],
     title: 'PrivateUserCreate'
+} as const;
+
+export const StockCreateSchema = {
+    properties: {
+        symbol: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Symbol'
+        },
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        price: {
+            type: 'number',
+            title: 'Price',
+            default: 0
+        },
+        market_cap: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Cap'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    required: ['symbol', 'name'],
+    title: 'StockCreate'
+} as const;
+
+export const StockPatternCategorySchema = {
+    type: 'string',
+    enum: ['Candlestick', 'Chart', 'Breakout', 'Volume', 'Momentum', 'Support Resistance', 'Custom', 'AI'],
+    title: 'StockPatternCategory'
+} as const;
+
+export const StockPatternPublicSchema = {
+    properties: {
+        pattern_date: {
+            type: 'string',
+            format: 'date',
+            title: 'Pattern Date'
+        },
+        pattern_name: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Pattern Name'
+        },
+        pattern_category: {
+            '$ref': '#/components/schemas/StockPatternCategory',
+            default: 'Candlestick'
+        },
+        signal: {
+            '$ref': '#/components/schemas/StockPatternSignal',
+            default: 'NEUTRAL'
+        },
+        strength: {
+            type: 'integer',
+            maximum: 100,
+            minimum: 0,
+            title: 'Strength',
+            default: 0
+        },
+        confidence: {
+            type: 'number',
+            maximum: 100,
+            minimum: 0,
+            title: 'Confidence',
+            default: 0
+        },
+        score: {
+            type: 'number',
+            title: 'Score',
+            default: 0
+        },
+        candle_index: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Candle Index'
+        },
+        timeframe: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Timeframe',
+            default: '1D'
+        },
+        detected_by: {
+            '$ref': '#/components/schemas/DetectedBy',
+            default: 'TA-Lib'
+        },
+        remarks: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Remarks'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        stock_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Stock Id'
+        },
+        price_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Price Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['pattern_date', 'pattern_name', 'id', 'stock_id', 'created_at'],
+    title: 'StockPatternPublic'
+} as const;
+
+export const StockPatternSignalSchema = {
+    type: 'string',
+    enum: ['BUY', 'SELL', 'NEUTRAL'],
+    title: 'StockPatternSignal'
+} as const;
+
+export const StockPatternsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/StockPatternPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'StockPatternsPublic'
+} as const;
+
+export const StockPricePublicSchema = {
+    properties: {
+        date: {
+            type: 'string',
+            format: 'date',
+            title: 'Date'
+        },
+        open: {
+            type: 'number',
+            title: 'Open'
+        },
+        high: {
+            type: 'number',
+            title: 'High'
+        },
+        low: {
+            type: 'number',
+            title: 'Low'
+        },
+        close: {
+            type: 'number',
+            title: 'Close'
+        },
+        adj_close: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Adj Close'
+        },
+        volume: {
+            type: 'integer',
+            title: 'Volume'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        stock_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Stock Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['date', 'open', 'high', 'low', 'close', 'volume', 'id', 'stock_id'],
+    title: 'StockPricePublic'
+} as const;
+
+export const StockPricesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/StockPricePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'StockPricesPublic'
+} as const;
+
+export const StockPublicSchema = {
+    properties: {
+        symbol: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Symbol'
+        },
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        price: {
+            type: 'number',
+            title: 'Price',
+            default: 0
+        },
+        market_cap: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Cap'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['symbol', 'name', 'id'],
+    title: 'StockPublic'
+} as const;
+
+export const StockUpdateSchema = {
+    properties: {
+        symbol: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Symbol'
+        },
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        price: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Price'
+        },
+        market_cap: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Market Cap'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        }
+    },
+    type: 'object',
+    title: 'StockUpdate'
+} as const;
+
+export const StocksPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/StockPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'StocksPublic'
 } as const;
 
 export const TokenSchema = {

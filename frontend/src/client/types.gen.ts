@@ -9,6 +9,20 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type Body_stocks_analyze_stock_excel = {
+    file: string;
+};
+
+export type Body_stocks_upload_stock_excel = {
+    file: string;
+};
+
+export type Body_stocks_upload_stock_history = {
+    file: string;
+};
+
+export type DetectedBy = 'TA-Lib' | 'Custom' | 'AI' | 'User';
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -50,6 +64,82 @@ export type PrivateUserCreate = {
     password: string;
     full_name: string;
     is_verified?: boolean;
+};
+
+export type StockCreate = {
+    symbol: string;
+    name: string;
+    price?: number;
+    market_cap?: (number | null);
+    description?: (string | null);
+};
+
+export type StockPatternCategory = 'Candlestick' | 'Chart' | 'Breakout' | 'Volume' | 'Momentum' | 'Support Resistance' | 'Custom' | 'AI';
+
+export type StockPatternPublic = {
+    pattern_date: string;
+    pattern_name: string;
+    pattern_category?: StockPatternCategory;
+    signal?: StockPatternSignal;
+    strength?: number;
+    confidence?: number;
+    score?: number;
+    candle_index?: (number | null);
+    timeframe?: string;
+    detected_by?: DetectedBy;
+    remarks?: (string | null);
+    id: string;
+    stock_id: string;
+    price_id?: (string | null);
+    created_at: string;
+};
+
+export type StockPatternSignal = 'BUY' | 'SELL' | 'NEUTRAL';
+
+export type StockPatternsPublic = {
+    data: Array<StockPatternPublic>;
+    count: number;
+};
+
+export type StockPricePublic = {
+    date: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    adj_close?: (number | null);
+    volume: number;
+    id: string;
+    stock_id: string;
+    created_at?: (string | null);
+};
+
+export type StockPricesPublic = {
+    data: Array<StockPricePublic>;
+    count: number;
+};
+
+export type StockPublic = {
+    symbol: string;
+    name: string;
+    price?: number;
+    market_cap?: (number | null);
+    description?: (string | null);
+    id: string;
+    created_at?: (string | null);
+};
+
+export type StocksPublic = {
+    data: Array<StockPublic>;
+    count: number;
+};
+
+export type StockUpdate = {
+    symbol?: (string | null);
+    name?: (string | null);
+    price?: (number | null);
+    market_cap?: (number | null);
+    description?: (string | null);
 };
 
 export type Token = {
@@ -176,6 +266,117 @@ export type PrivateCreateUserData = {
 };
 
 export type PrivateCreateUserResponse = (UserPublic);
+
+export type StocksReadStocksData = {
+    limit?: number;
+    /**
+     * Search by symbol or name
+     */
+    search?: (string | null);
+    skip?: number;
+};
+
+export type StocksReadStocksResponse = (StocksPublic);
+
+export type StocksCreateStockData = {
+    requestBody: StockCreate;
+};
+
+export type StocksCreateStockResponse = (StockPublic);
+
+export type StocksReadStockData = {
+    id: string;
+};
+
+export type StocksReadStockResponse = (StockPublic);
+
+export type StocksUpdateStockData = {
+    id: string;
+    requestBody: StockUpdate;
+};
+
+export type StocksUpdateStockResponse = (StockPublic);
+
+export type StocksDeleteStockData = {
+    id: string;
+};
+
+export type StocksDeleteStockResponse = (Message);
+
+export type StocksUploadStockExcelData = {
+    formData: Body_stocks_upload_stock_excel;
+};
+
+export type StocksUploadStockExcelResponse = (Message);
+
+export type StocksUploadStockHistoryData = {
+    formData: Body_stocks_upload_stock_history;
+    id: string;
+};
+
+export type StocksUploadStockHistoryResponse = (Message);
+
+export type StocksGetStockPricesData = {
+    id: string;
+    limit?: number;
+};
+
+export type StocksGetStockPricesResponse = (StockPricesPublic);
+
+export type StocksGetStockPatternsData = {
+    id: string;
+    minStrength?: number;
+    patternCategory?: (StockPatternCategory | null);
+    signal?: (StockPatternSignal | null);
+};
+
+export type StocksGetStockPatternsResponse = (StockPatternsPublic);
+
+export type StocksScreenPatternsData = {
+    /**
+     * Pattern category
+     */
+    category?: (StockPatternCategory | null);
+    limit?: number;
+    minStrength?: number;
+    /**
+     * BUY, SELL, or NEUTRAL
+     */
+    signal?: (StockPatternSignal | null);
+    skip?: number;
+    /**
+     * Filter by detection date
+     */
+    targetDate?: (string | null);
+};
+
+export type StocksScreenPatternsResponse = (StockPatternsPublic);
+
+export type StocksGetStockNewsData = {
+    id: string;
+};
+
+export type StocksGetStockNewsResponse = (unknown);
+
+export type StocksCalculateStockIndicatorsData = {
+    id: string;
+};
+
+export type StocksCalculateStockIndicatorsResponse = (Message);
+
+export type StocksDownloadHistoryData = {
+    symbol: string;
+};
+
+export type StocksDownloadHistoryResponse = (unknown);
+
+export type StocksDownloadAllResponse = (unknown);
+
+export type StocksAnalyzeStockExcelData = {
+    formData: Body_stocks_analyze_stock_excel;
+};
+
+export type StocksAnalyzeStockExcelResponse = (unknown);
 
 export type UsersReadUsersData = {
     limit?: number;

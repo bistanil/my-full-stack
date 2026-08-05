@@ -14,55 +14,77 @@
 from sqlmodel import Field, SQLModel
 
 # 1. Database Table representation
-class Stock(SQLModel, table=True):
-    __tablename__: str = "stocks"
-
-    id: Optional[int] = Field(default=None, primary_key=True)
-    symbol: str = Field(index=True, unique=True, nullable=False)
-    name: str = Field(nullable=False)
+# 1. Base / Shared properties
+class StockBase(SQLModel):
+    symbol: str = Field(index=True, unique=True, max_length=50)
+    name: str = Field(max_length=255)
     price: float = Field(default=0.0)
-    market_cap: Optional[float] = Field(default=None)
-    description: Optional[str] = Field(default=None)
+    market_cap: float | None = Field(default=None)
+    description: str | None = Field(
+        default=None,
+        sa_column=Column(Text, nullable=True) # Allows unlimited long descriptions without truncating
+    )
 
-# 2. Schema used for creating data via API POST requests
-class StockCreate(SQLModel):
-    symbol: str
-    name: str
-    price: float = 0.0
-    market_cap: Optional[float] = None
-    description: Optional[str] = None
+# 2. Database Model (table name automatically becomes "stock")
+class Stock(StockBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
 
-# 3. Schema used for updates via API PUT requests
+# 3. Request Schemas
+class StockCreate(StockBase):
+    pass
+
 class StockUpdate(SQLModel):
-    symbol: Optional[str] = None
-    name: Optional[str] = None
-    price: Optional[float] = None
-    market_cap: Optional[float] = None
-    description: Optional[str] = None
+    symbol: str | None = Field(default=None, max_length=50)
+    name: str | None = Field(default=None, max_length=255)
+    price: float | None = None
+    market_cap: float | None = None
+    description: str | None = None
 
-# 4. Schema used for safe outbound API responses (Public Data)
-class StockPublic(SQLModel):
-    id: int
-    symbol: str
-    name: str
-    price: float
-    market_cap: Optional[float]
-    description: Optional[str]
+# 4. Response Schemas
+class StockPublic(StockBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
 
-# 5. Paginated wrapper schema for multiple items
 class StocksPublic(SQLModel):
     data: list[StockPublic]
     count: int
+
+
 🧬 Layer 2: Database Table Creation (Migrations)Because you added a physical database table (table=True), you must generate an evolutionary version file via Alembic so your underlying database builds the table columns:Bash# 1. Spin up background services if stopped
+
 docker compose up -d
 
 # 2. Automatically generate the structure modification blueprint
+
 docker compose exec backend alembic revision --autogenerate -m "Add stocks table"
 
 # 3. Apply the schema change directly onto the running database instance
+
 docker compose exec backend alembic upgrade head
 
+-----------------------------------------------------
+docker cp $(docker compose ps -q backend):/backend/app/alembic/versions/769acd2d4259_add_stocks_table.py ./backend/app/alembic/versions/
+
+docker compose run --rm backend bash /app/backend/app/prestart.sh
+
+docker compose build backend --no-cache
+
+docker compose up -d
+
+docker compose ps
+
+out put
+prestart-1: Exited (0)
+--------------------------------------------------------
+
+
+
 🔌 Layer 3: API Route InfrastructureCreate a new file containing your structural CRUD operations and register it with your master api router matrix.1. Create the routes file: backend/app/api/routes/stocks.pyPythonfrom typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, func, select
 from app.api.deps import get_db, get_current_active_superuser
@@ -165,3 +187,83 @@ const items = currentUser?.is_superuser
   : baseItems
 
 
+-------------------------------------------
+adding pandas in project -uv commands
+
+uv add pandas
+
+adding pandas in project
+
+
+pyproject.toml
+"pandas>=2.2.0",
+"openpyxl>=3.1.0", # Added for Excel file support (.xlsx)
+
+then run
+uv lock
+uv sync
+
+ then run
+docker compose build backend
+docker compose up -d backend
+
+
+prestart error log
+
+docker compose logs -f prestart
+docker logs -f stockai-prestart-1
+
+run previous version
+
+# 1. Stop and remove containers (keeps database volumes intact)
+docker compose down
+
+# 2. Re-run docker compose up
+docker compose up -d
+
+docker compose logs db
+docker compose exec db psql -U postgres -d app
+
+docker compose restart db
+docker compose restart backend prestart
+
+--------------------------------
+backend
+docker compose down -v
+
+front end
+
+npm run generate-client
+-------------------------------
+
+generate new layout paths
+# example
+export const Route = createFileRoute("/_layout/stocks")(
+command for that
+
+npx @tanstack/router-cli generate
+
+daemon: failed to set up container networking: network a01b8ad7709c36c208a4e120d4ef71b7d1587fc442226bc231deba0551bc9708 not found
+
+docker compose down --remove-orphans
+
+docker network prune -f
+
+------------------------------------------------------------------
+stock not visible
+
+docker run --rm -v "$(pwd)/frontend:/app" -w /app node:20-alpine npx @tanstack/router-cli generate
+
+docker compose build frontend
+
+
+
+
+
+curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6INPkDqoBGW1dzyM8dfbM0kWAl4W-S0pP9YvdmBcsGm2A" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [{
+      "parts":[{"text": "Hello Gemini!"}]
+    }]
+  }'

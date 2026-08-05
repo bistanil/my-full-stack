@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, StocksReadStocksData, StocksReadStocksResponse, StocksCreateStockData, StocksCreateStockResponse, StocksReadStockData, StocksReadStockResponse, StocksUpdateStockData, StocksUpdateStockResponse, StocksDeleteStockData, StocksDeleteStockResponse, StocksUploadStockExcelData, StocksUploadStockExcelResponse, StocksUploadStockHistoryData, StocksUploadStockHistoryResponse, StocksGetStockPricesData, StocksGetStockPricesResponse, StocksGetStockPatternsData, StocksGetStockPatternsResponse, StocksScreenPatternsData, StocksScreenPatternsResponse, StocksGetStockNewsData, StocksGetStockNewsResponse, StocksCalculateStockIndicatorsData, StocksCalculateStockIndicatorsResponse, StocksDownloadHistoryData, StocksDownloadHistoryResponse, StocksDownloadAllResponse, StocksAnalyzeStockExcelData, StocksAnalyzeStockExcelResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class ItemsService {
     /**
@@ -228,6 +228,344 @@ export class PrivateService {
             url: '/api/v1/private/users/',
             body: data.requestBody,
             mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class StocksService {
+    /**
+     * Read Stocks
+     * Retrieve stocks sorted by newest first with optional search filter.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.search Search by symbol or name
+     * @returns StocksPublic Successful Response
+     * @throws ApiError
+     */
+    public static readStocks(data: StocksReadStocksData = {}): CancelablePromise<StocksReadStocksResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stocks/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                search: data.search
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Stock
+     * Create a new stock record (Admin restricted).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns StockPublic Successful Response
+     * @throws ApiError
+     */
+    public static createStock(data: StocksCreateStockData): CancelablePromise<StocksCreateStockResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Stock
+     * Get stock by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns StockPublic Successful Response
+     * @throws ApiError
+     */
+    public static readStock(data: StocksReadStockData): CancelablePromise<StocksReadStockResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stocks/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Stock
+     * Update a stock record (Admin restricted).
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns StockPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateStock(data: StocksUpdateStockData): CancelablePromise<StocksUpdateStockResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/stocks/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Stock
+     * Delete a stock record (Admin restricted).
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static deleteStock(data: StocksDeleteStockData): CancelablePromise<StocksDeleteStockResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/stocks/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Upload Stock Excel
+     * Bulk ingest stock data from an exported Google Sheet (.xlsx, .xls, .csv).
+     *
+     * Updates existing stocks if symbol matches, or inserts new entries.
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static uploadStockExcel(data: StocksUploadStockExcelData): CancelablePromise<StocksUploadStockExcelResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/upload-excel',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Upload Stock History
+     * Upload OHLC historical CSV/Excel data for a specific stock ticker.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.formData
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static uploadStockHistory(data: StocksUploadStockHistoryData): CancelablePromise<StocksUploadStockHistoryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/{id}/history',
+            path: {
+                id: data.id
+            },
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Stock Prices
+     * Get historical OHLC price rows for a given stock.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.limit
+     * @returns StockPricesPublic Successful Response
+     * @throws ApiError
+     */
+    public static getStockPrices(data: StocksGetStockPricesData): CancelablePromise<StocksGetStockPricesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stocks/{id}/prices',
+            path: {
+                id: data.id
+            },
+            query: {
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Stock Patterns
+     * Retrieve detected chart/candlestick patterns for a specific stock.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.patternCategory
+     * @param data.signal
+     * @param data.minStrength
+     * @returns StockPatternsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getStockPatterns(data: StocksGetStockPatternsData): CancelablePromise<StocksGetStockPatternsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stocks/{id}/patterns',
+            path: {
+                id: data.id
+            },
+            query: {
+                pattern_category: data.patternCategory,
+                signal: data.signal,
+                min_strength: data.minStrength
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Screen Patterns
+     * Screen across all stocks to find active patterns matching signal/strength parameters.
+     * @param data The data for the request.
+     * @param data.targetDate Filter by detection date
+     * @param data.signal BUY, SELL, or NEUTRAL
+     * @param data.category Pattern category
+     * @param data.minStrength
+     * @param data.skip
+     * @param data.limit
+     * @returns StockPatternsPublic Successful Response
+     * @throws ApiError
+     */
+    public static screenPatterns(data: StocksScreenPatternsData = {}): CancelablePromise<StocksScreenPatternsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stocks/patterns/screener',
+            query: {
+                target_date: data.targetDate,
+                signal: data.signal,
+                category: data.category,
+                min_strength: data.minStrength,
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Stock News
+     * Fetch live news and sentiment analysis for a given stock.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getStockNews(data: StocksGetStockNewsData): CancelablePromise<StocksGetStockNewsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stocks/{id}/news',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Calculate Stock Indicators
+     * Trigger TA-Lib Engine to compute EMAs, RSI, MACD, ATR & BBands for a given stock.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static calculateStockIndicators(data: StocksCalculateStockIndicatorsData): CancelablePromise<StocksCalculateStockIndicatorsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/{id}/calculate-indicators',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Download History
+     * @param data The data for the request.
+     * @param data.symbol
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static downloadHistory(data: StocksDownloadHistoryData): CancelablePromise<StocksDownloadHistoryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/{symbol}/download-history',
+            path: {
+                symbol: data.symbol
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Download All
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static downloadAll(): CancelablePromise<StocksDownloadAllResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/download-all'
+        });
+    }
+    
+    /**
+     * Analyze Stock Excel
+     * Analyze Screener Excel file and return structured financial & AI insights.
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static analyzeStockExcel(data: StocksAnalyzeStockExcelData): CancelablePromise<StocksAnalyzeStockExcelResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stocks/analyze-excel',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
             errors: {
                 422: 'Validation Error'
             }
